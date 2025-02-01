@@ -88,7 +88,11 @@ _Aplicação de loja para dispositivos mobile de Sistema Operacional Android_
 
 ## Relacionamentos entre entidades
 `Cliente <-> Endereco`: Um cliente possui um endereço `(relação 1 para 1)`.
+
 `Cliente <-> OrdemDeCompra`: Um cliente pode ter várias ordens de compra `(relação 1 para muitos)`.
+
 `OrdemDeCompra <-> Item`: Uma ordem de compra possui vários itens `(relação 1 para muitos)`.
+
 `Item <-> Produto`: Um item se refere a um produto específico `(relação 1 para 1)`.
+
 `Funcionario <-> OrdemDeCompra`: Um funcionário pode ser responsável por várias ordens de compra `(relação 1 para muitos)`.
