@@ -1,14 +1,18 @@
-# Shoepee
+# 🛍️ Shoepee
 _Aplicação de loja para dispositivos mobile de Sistema Operacional Android_
 
-## Introdução
-`TODO`
+## 💡 Introdução
+`A Fazer`
 
-## Prototipo Figma
+## 🗺️ UML do Projeto
+[**🧠 Link de mapa lógico no Excalidraw 🖌️**]()
+![UML](https://github.com/user-attachments/assets/2eb36f89-89f7-48de-9e1a-3817088c2d99)
+
+## 🤖 Prototipo Figma
 [🌏**Link de interface Figma**🎨](https://www.figma.com/design/2hMOdfr9efI621MKYYTabq/Shoepee-Prototype?node-id=0-1&p=f&t=NtROQv8dYVv8bcpR-0)
 
 
-## Tabela de Entidades
+## 🎲 Tabela de Entidades
 #### Cliente (`Client`)
 
 | Campo               | Tipo               | Descrição                           |
