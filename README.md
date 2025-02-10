@@ -1,6 +1,10 @@
 # 🛍️ Shoepee
 _Aplicação de loja para dispositivos mobile de Sistema Operacional Android_
 
+Desenvolver uma aplicação _client-side_ de loja de calçados, onde, como cliente, você terá acesso à itens disponíveis para compra dentro da plataforma, adicioná-los em um carrinho e por fim, finalizar a compra ou cancela-la. 
+
+
+
 ## 💡 Introdução
 `A Fazer`
 
