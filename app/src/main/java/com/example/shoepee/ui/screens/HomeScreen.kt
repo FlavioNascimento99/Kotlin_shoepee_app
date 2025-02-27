@@ -20,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.shoepee.ui.components.HomeScreen_ItemsContainer
 import com.example.shoepee.ui.components.LazyRow_Brands
+import com.example.shoepee.ui.screens.RegisterScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -30,10 +32,12 @@ fun HomeScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier
-                    .border(5.dp, Color.White, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp)),
+                modifier = Modifier,
                 title = {
-                    Text("Hello")
+                    Text("Shoepee",
+                        fontSize = 24.sp, // Aumenta o tamanho da fonte
+                        color = Color.White)
+
                 },
                 actions = {
                     Icon(
@@ -42,7 +46,7 @@ fun HomeScreen() {
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.DarkGray
+                    containerColor = Color(0xFFFF9800)
                 )
             )
         },

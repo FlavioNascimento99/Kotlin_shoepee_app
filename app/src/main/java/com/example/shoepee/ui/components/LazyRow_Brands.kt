@@ -40,7 +40,15 @@ fun LazyRow_Brands() {
             "New Balance" to R.drawable.ic_new_balance,
             "Mizuno" to R.drawable.ic_mizuno,
             "Puma" to R.drawable.ic_puma,
-            "Gucci" to R.drawable.ic_gucci
+            "Gucci" to R.drawable.ic_gucci,
+            "Gucci" to R.drawable.ic_gucci,
+            "Balenciaga" to R.drawable.ic_balenciaga,
+            "Reebok" to R.drawable.ic_reebok,
+            "Converse" to R.drawable.ic_converse,
+            "Timberland" to R.drawable.ic_timberland,
+            "Asics" to R.drawable.ic_asics,
+            "Under Armour" to R.drawable.ic_underarmour,
+            "Vans" to R.drawable.ic_vans
         )
     }
 
@@ -76,12 +84,16 @@ fun LazyRow_Brands() {
                     .padding(10.dp)
                     .width(75.dp)
                     .height(75.dp),
-                shape = RoundedCornerShape(50.dp),
+
+                shape = RoundedCornerShape(50.dp)
+
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp),
+                        .padding(0.5.dp)
+                        .background(Color(0xFFFF9800)),
+
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
