@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.LocalDateTime
 
+// Equivalente ao carrinho, onde serão adicionados os <Item> a medida que for interessante para o <Cliente>;
 class BuyOrder {
     val id: String = ""
     val client: Client = Client()

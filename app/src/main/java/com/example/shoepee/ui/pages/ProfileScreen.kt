@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -45,100 +46,95 @@ fun ProfileScreen(
     userPhotoUrl: String? = null,
     onBackClick: () -> Unit = {}
 ) {
+
+    // Firebase Connectivity
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-
+    // Presets para dados inexistentes
     if (currentUser != null) {
         val userName = currentUser.displayName ?: "Nome não disponível"
         val userLogin = currentUser.email ?: "E-mail não disponível"
         val userPassword = "********" // Não podemos acessar a senha do usuário
         val userPhotoUrl = currentUser.photoUrl?.toString()
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text("Profile", fontSize = 24.sp, color = Color.White)
-                },
-                navigationIcon = {
-                    IconButton(onClick = { onBackClick() }) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Back",
-                            tint = Color.White
+        // Estrutura da página
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text("Profile", fontSize = 24.sp, color = Color.White)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { onBackClick() }) {
+                            Icon(
+                                imageVector = Icons.Default.Home,
+                                contentDescription = "Back",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFFFF9800) // Laranja
+                    )
+                )
+            },
+
+
+            content = { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (userPhotoUrl != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(userPhotoUrl),
+                            contentDescription = "User Profile Image",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFF9800) // Laranja
-                )
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                if (userPhotoUrl != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(userPhotoUrl),
-                        contentDescription = "User Profile Image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = userName,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
                     )
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Login: $userLogin",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
 
-                Text(
-                    text = userName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                    Text(
+                        text = "(Experimental)Password: $userPassword",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
 
-                Text(
-                    text = "Login: $userLogin",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                Text(
-                    text = "(Experimental)Password: $userPassword",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Button(
-                    onClick = {
-                        /* Handle logout logic here */
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Logout")
+                    Button(
+                        onClick = {
+                            
+                            // Adicionar evento de clique para Logout
+                        
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Logout")
+                    }
                 }
             }
-        }
-    )
+        )
+    }
 }
-}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun ProfileScreenPreview() {
-//    ProfileScreen(
-//        userName = "Flavio Nascimento",
-//        userLogin = "flavio@mail.com",
-//        userPassword = "****",
-//        userPhotoUrl = null, // Pode adicionar a URL da foto se tiver
-//        onBackClick = { /* Ação para voltar para Home */ }
-//    )
-//}

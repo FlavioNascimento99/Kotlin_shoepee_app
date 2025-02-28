@@ -1,6 +1,5 @@
 package com.example.shoepee.entity
 
-
 class Client {
     val id: Int = 0
     val name: String = ""

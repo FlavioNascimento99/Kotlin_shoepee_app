@@ -1,5 +1,6 @@
 package com.example.shoepee.entity
 
+// Classe que compõe o dado referente ao Endereço do Cliente em seu registro.
 class Address {
     val id: String = ""
     val street: String = ""

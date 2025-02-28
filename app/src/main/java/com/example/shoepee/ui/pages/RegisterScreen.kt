@@ -32,11 +32,13 @@ fun RegisterScreen(
     onSignUpComplete: () -> Unit,
     onBackClick: () -> Unit
 ) {
+    // Parâmetros da Entidade
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
 
+    // Excessões
+    var errorMessage by remember { mutableStateOf("") }
     var usernameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
@@ -53,15 +55,20 @@ fun RegisterScreen(
     val firestore = FirebaseFirestore.getInstance()
 
 
-
-
     // Função para registrar o usuário no Firebase
     fun registerUser(email: String, password: String, username: String) {
+
+        // Método de criação de conta do Firebase (Email/Conta)
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    // Agora, salvamos os dados do usuário no Firestore
+                    
+                    /*
+                        Agora, salvamos os dados do usuário no Documento do Firestore.
+                        
+                        OBS: Nesse caso, usuário e email são transmitidos por aqui enquanto que a senha é tratada pelo Firebase internamente.
+                    */
                     user?.let {
                         val userData = hashMapOf(
                             "username" to username,
@@ -70,24 +77,30 @@ fun RegisterScreen(
 
                         // Criando o documento do usuário no Firestore
                         firestore.collection("users")
-                            .document(user.uid)  // UID do usuário autenticado
-                            .set(userData)
+                            .document(user.uid)     // UID do usuário autenticado
+                            .set(userData)          // Mapeamento de campos do Documento Firebase
                             .addOnSuccessListener {
+
                                 // Sucesso ao salvar os dados no Firestore
                                 Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+
+                                // Redirecionador
                                 onSignUpComplete()
+                            
                             }
                             .addOnFailureListener { exception ->
-                                // Falha ao salvar os dados
+                                // Se for apresentado falha ao salvar os dados durante a conexão com Banco.
                                 Toast.makeText(context, "Erro ao salvar dados: ${exception.message}", Toast.LENGTH_SHORT).show()
                             }
                     }
                 } else {
+
                     // Falha no registro do usuário
                     Toast.makeText(context, "Erro no cadastro: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                
                 }
             }
-    }
+        }
 
     Column(
         modifier = modifier
