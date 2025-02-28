@@ -1,4 +1,4 @@
-package com.example.shoepee.ui.components
+package com.example.shoepee.ui.pages.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -34,10 +34,10 @@ fun PostCard(
         }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PostCardPreview() {
-    MaterialTheme {
-        PostCard("title", "some description")
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PostCardPreview() {
+//    MaterialTheme {
+//        PostCard("title", "some description")
+//    }
+//}

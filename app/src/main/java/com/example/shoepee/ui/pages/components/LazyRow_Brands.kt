@@ -1,4 +1,4 @@
-package com.example.shoepee.ui.components
+package com.example.shoepee.ui.pages.components
 
 import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
@@ -97,7 +97,7 @@ fun LazyRow_Brands() {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    val iconRes = brandIcons[brand] ?: R.drawable.ic_default // Usa um ícone padrão se não houver um específico
+                    val iconRes = brandIcons[brand] ?: R.drawable.ic_default
                     Box(
                         modifier = Modifier
                             .size(64.dp)
@@ -109,12 +109,9 @@ fun LazyRow_Brands() {
                             painter = painterResource(id = iconRes),
                             contentDescription = "Logo de $brand",
                             modifier = Modifier.size(44.dp),
-                            tint = Color.Unspecified // Mantém a cor original do ícone
+                            tint = Color.Unspecified
                         )
-
                         Spacer(modifier = Modifier.width(8.dp))
-
-
                     }
                 }
             }

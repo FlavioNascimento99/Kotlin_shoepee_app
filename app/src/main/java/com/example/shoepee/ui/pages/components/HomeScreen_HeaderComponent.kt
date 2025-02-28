@@ -1,4 +1,4 @@
-package com.example.shoepee.ui.components
+package com.example.shoepee.ui.pages.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

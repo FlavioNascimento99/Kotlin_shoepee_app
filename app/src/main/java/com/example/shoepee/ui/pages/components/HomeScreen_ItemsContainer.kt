@@ -1,4 +1,4 @@
-package com.example.shoepee.ui.components
+package com.example.shoepee.ui.pages.components
 
 import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.background

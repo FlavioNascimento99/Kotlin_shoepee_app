@@ -1,4 +1,4 @@
-package com.example.shoepee.ui.screens
+package com.example.shoepee.ui.pages
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,6 +10,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
@@ -17,11 +18,32 @@ fun LoginScreen(
     onSignInClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
+    var username by remember { mutableStateOf(TextFieldValue("")) }
+    var userpassword by remember { mutableStateOf(TextFieldValue("")) }
     var passwordError by remember { mutableStateOf(false) }
 
-    var username by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
     var errorMessage by remember { mutableStateOf("") }
+
+    val auth = FirebaseAuth.getInstance()
+
+
+    // Função de login no Firebase
+    fun loginUser(email: String, password: String) {
+        if (email.isNotBlank() && password.isNotBlank()) {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        onSignInClick(user?.email ?: "User", password)
+                    } else {
+                        // Se houver erro no login
+                        errorMessage = "Falha no login: ${task.exception?.message}"
+                    }
+                }
+        }
+    }
+
+
 
     Box(modifier = modifier) {
         Column(
@@ -40,9 +62,9 @@ fun LoginScreen(
                     .fillMaxWidth(0.8f)
             )
             OutlinedTextField(
-                value = password,
+                value = userpassword,
                 onValueChange = {
-                    password = it
+                    userpassword = it
                     passwordError = it.text.length < 8
                 },
                 label = { Text("Senha") },
@@ -57,8 +79,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = {
-                    if (username.text.isNotBlank() && password.text.length >= 8) {
-                        onSignInClick(username.text, password.text)
+                    if (username.text.isNotBlank() && userpassword.text.length >= 8) {
+                        loginUser(username.text, userpassword.text)
                     } else {
                         errorMessage = "Preencha ambos os campos"
                     }
@@ -71,7 +93,10 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Button(
-                onClick = onSignUpClick,
+                onClick = {
+                    onSignUpClick()
+                    println("Clicou em Cadastrar, indo para a tela de registro")
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA500)),
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {

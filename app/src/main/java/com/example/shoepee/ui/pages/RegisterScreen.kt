@@ -1,9 +1,7 @@
-package com.example.shoepee.ui.screens
+package com.example.shoepee.ui.pages
 
-import android.os.Bundle
+import android.util.Patterns
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,14 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,25 +35,58 @@ fun RegisterScreen(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var cpf by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
     var usernameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
-    var cpfError by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
-    // Função para validar CPF (Básica, sem dígito verificador)
-    fun isValidCPF(cpf: String): Boolean {
-        val digits = cpf.filter { it.isDigit() }
-        return digits.length == 11
-    }
-
     // Função para validar e-mail corretamente
     fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    // Instância do FirebaseAuth e FirebaseFirestore
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+
+
+
+
+    // Função para registrar o usuário no Firebase
+    fun registerUser(email: String, password: String, username: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    // Agora, salvamos os dados do usuário no Firestore
+                    user?.let {
+                        val userData = hashMapOf(
+                            "username" to username,
+                            "email" to email
+                        )
+
+                        // Criando o documento do usuário no Firestore
+                        firestore.collection("users")
+                            .document(user.uid)  // UID do usuário autenticado
+                            .set(userData)
+                            .addOnSuccessListener {
+                                // Sucesso ao salvar os dados no Firestore
+                                Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                                onSignUpComplete()
+                            }
+                            .addOnFailureListener { exception ->
+                                // Falha ao salvar os dados
+                                Toast.makeText(context, "Erro ao salvar dados: ${exception.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                } else {
+                    // Falha no registro do usuário
+                    Toast.makeText(context, "Erro no cadastro: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     Column(
@@ -126,37 +156,15 @@ fun RegisterScreen(
             Text("A senha deve ter pelo menos 8 caracteres", color = Color.Red, fontSize = 12.sp)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // CPF
-        OutlinedTextField(
-            value = cpf,
-            onValueChange = { newCpf ->
-                cpf = newCpf.filter { it.isDigit() }.take(11) // Permite apenas números
-                cpfError = !isValidCPF(cpf)
-            },
-            label = { Text("CPF") },
-            isError = cpfError,
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done)
-        )
-        if (cpfError) {
-            Text("Digite um CPF válido (11 dígitos)", color = Color.Red, fontSize = 12.sp)
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // Botão Registrar
         Button(
             onClick = {
-                usernameError = username.isBlank()
-                emailError = !isValidEmail(email)
-                passwordError = password.length < 8
-                cpfError = !isValidCPF(cpf)
-
-                if (!usernameError && !emailError && !passwordError && !cpfError) {
-                    Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                    onSignUpComplete()
+                if (username.isNotBlank() && isValidEmail(email) && password.length >= 8) {
+                    registerUser(email, password, username)
+                } else {
+                    Toast.makeText(context, "Preencha todos os campos corretamente", Toast.LENGTH_SHORT).show()
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA500)),
@@ -179,5 +187,3 @@ fun RegisterScreen(
         }
     }
 }
-
-
