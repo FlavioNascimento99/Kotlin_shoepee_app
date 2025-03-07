@@ -37,6 +37,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 
 
+// Tela de visualização de usuário (quando logado)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -47,18 +48,19 @@ fun ProfileScreen(
     onBackClick: () -> Unit = {}
 ) {
 
-    // Firebase Connectivity
+
+    // Criando instância de conexão com Banco de Dados Firebase
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    // Presets para dados inexistentes
+
+    // Presets para dados caso os mesmos sejam "não-nulos"
     if (currentUser != null) {
         val userName = currentUser.displayName ?: "Nome não disponível"
         val userLogin = currentUser.email ?: "E-mail não disponível"
-        val userPassword = "********" // Não podemos acessar a senha do usuário
+        val userPassword = "********"
         val userPhotoUrl = currentUser.photoUrl?.toString()
 
-        // Estrutura da página
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -66,6 +68,8 @@ fun ProfileScreen(
                         Text("Profile", fontSize = 24.sp, color = Color.White)
                     },
                     navigationIcon = {
+
+                        // Função para navegação onBackClick() muda propriedade 
                         IconButton(onClick = { onBackClick() }) {
                             Icon(
                                 imageVector = Icons.Default.Home,
@@ -75,7 +79,7 @@ fun ProfileScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFFFF9800) // Laranja
+                        containerColor = Color(0xFFFF9800)
                     )
                 )
             },
@@ -126,7 +130,7 @@ fun ProfileScreen(
                     Button(
                         onClick = {
                             
-                            // Adicionar evento de clique para Logout
+                            // @TODO: Adicionar evento de logout
                         
                         },
                         modifier = Modifier.fillMaxWidth()

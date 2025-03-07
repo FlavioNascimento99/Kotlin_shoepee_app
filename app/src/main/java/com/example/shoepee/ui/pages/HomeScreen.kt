@@ -28,6 +28,7 @@ fun HomeScreen(
     ) {
     var isProfileScreenVisible by remember { mutableStateOf(false) }
 
+
     if (isProfileScreenVisible) {
         ProfileScreen("user.flavio", "user.login", "user.password", null, onBackClick = {isProfileScreenVisible = false})
     } else {
@@ -37,7 +38,7 @@ fun HomeScreen(
                     modifier = Modifier,
                     title = {
                         Text("Shoepee",
-                            fontSize = 24.sp, // Aumenta o tamanho da fonte
+                            fontSize = 24.sp,
                             color = Color.White)
 
                     },

@@ -40,6 +40,9 @@ fun AppNavigation() {
     }
 
     when (currentScreen) {
+
+
+
         "login" -> LoginScreen(
             onSignInClick = { username, password ->
                 if (username.isNotBlank() && password.isNotBlank()) {
@@ -47,10 +50,13 @@ fun AppNavigation() {
                     currentScreen = "home"
                 }
             },
-            onSignUpClick = { currentScreen = "register" }  // Essa linha deve mudar para a tela de registro
+            onSignUpClick = { currentScreen = "register" }
         )
 
+
+
         "register" -> RegisterScreen(onSignUpComplete = { currentScreen = "login" }, onBackClick = { currentScreen = "login" })
+
 
 
         "home" -> if (isAuthenticated)
@@ -58,6 +64,8 @@ fun AppNavigation() {
                 onProfileClick = { currentScreen = "profile" }
             ) else
                 currentScreen = "login"
+
+
 
         "profile" -> if (isAuthenticated) {
             ProfileScreen(
@@ -68,8 +76,12 @@ fun AppNavigation() {
                 onBackClick = { currentScreen = "home" },
                 )
         } else {
-            currentScreen = "login" // Caso não esteja autenticado, vai para a tela de login
+            currentScreen = "login"
         }
 
+
+
     }
+
+
 }
