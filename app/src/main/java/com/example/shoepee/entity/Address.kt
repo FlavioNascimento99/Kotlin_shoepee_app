@@ -1,13 +1,12 @@
 package com.example.shoepee.entity
 
+import com.google.gson.annotations.SerializedName
+
 // Classe que compõe o dado referente ao Endereço do Cliente em seu registro.
-class Address {
-    val id: String = ""
-    val street: String = ""
-    val number: String = ""
-    val complement: String = ""
-    val neighborhood: String = ""
-    val city: String = ""
-    val state: String = ""
-    val cep: String = ""
-}
+data class Address (
+    @SerializedName("cep") val cep: String = "",
+    @SerializedName("logradouro") val street: String = "",
+    @SerializedName("bairro") val neighborhood: String = "",
+    @SerializedName("localidade") val city: String = "",
+    @SerializedName("uf") val state: String = ""
+)

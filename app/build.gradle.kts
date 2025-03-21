@@ -62,4 +62,16 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Retrofit and OkHttp Dependencies
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // Para converter JSON para objetos
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.1") // Para log de requisições HTTP (opcional)
+
+    // Coil for Image Loading (if you're using it)
+    implementation(libs.coil.compose)
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0") // Certifique-se de usar a versão mais recente
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.1") // Para logar requisições e respostas HTTP
+
 }

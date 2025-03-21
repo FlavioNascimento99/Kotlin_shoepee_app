@@ -1,5 +1,6 @@
 package com.example.shoepee.ui.pages
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,9 +38,18 @@ fun LoginScreen(
                         onSignInClick(user?.email ?: "User", password)
                     } else {
                         // Se houver erro no login
-                        errorMessage = "Falha no login: ${task.exception?.message}"
+                        val error = task.exception?.message ?: "Erro desconhecido"
+                        errorMessage = "Falha no login: $error"
+                        Log.e("LoginError", "Erro no login: $error")
                     }
                 }
+                .addOnFailureListener { exception ->
+                    // Captura de falhas gerais, se ocorrerem
+                    errorMessage = "Erro de conexão: ${exception.message}"
+                    Log.e("LoginError", "Erro de conexão: ${exception.message}")
+                }
+        } else {
+            errorMessage = "Por favor, preencha todos os campos"
         }
     }
 

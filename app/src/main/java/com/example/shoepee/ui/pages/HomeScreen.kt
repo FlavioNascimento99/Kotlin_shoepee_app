@@ -18,19 +18,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.shoepee.ui.pages.components.LazyRow_Brands
 import com.example.shoepee.ui.pages.components.HomeScreen_ItemsContainer
+import com.google.firebase.auth.FirebaseAuth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun HomeScreen(
-    onProfileClick: () -> Unit = {}
-    ) {
+    onProfileClick: () -> Unit = {},
+    onProductClick: () -> Unit = {}
+    )
+{
     var isProfileScreenVisible by remember { mutableStateOf(false) }
 
 
     if (isProfileScreenVisible) {
-        ProfileScreen("user.flavio", "user.login", "user.password", null, onBackClick = {isProfileScreenVisible = false})
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userName = currentUser?.displayName ?: "Nome não disponível"
+        val userLogin = currentUser?.email ?: "E-mail não disponível"
+        val userPhotoUrl = currentUser?.photoUrl?.toString()
+
+        // Exibe o perfil do usuário
+        ProfileScreen(
+            userName = userName,
+            userLogin = userLogin,
+            userPhotoUrl = userPhotoUrl,
+            onBackClick = { isProfileScreenVisible = false }
+        )
+
     } else {
         Scaffold(
             topBar = {
@@ -43,7 +58,7 @@ fun HomeScreen(
 
                     },
                     actions = {
-                        IconButton(onClick = { isProfileScreenVisible = true } ) {
+                        IconButton(onClick = { onProfileClick() }) {
                             Icon(
                                 imageVector = Icons.Rounded.Person,
                                 contentDescription = "text"
@@ -65,9 +80,7 @@ fun HomeScreen(
                 ) {
                     LazyRow_Brands()
 
-                    HomeScreen_ItemsContainer(
-                        modifier = Modifier.border(10.dp, Color.Black)
-                    )
+                    HomeScreen_ItemsContainer(onItemClick = { onProductClick() })
                 }
             }
         )

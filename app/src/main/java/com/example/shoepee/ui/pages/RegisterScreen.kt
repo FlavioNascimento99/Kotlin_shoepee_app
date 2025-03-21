@@ -1,5 +1,10 @@
 package com.example.shoepee.ui.pages
 
+import android.annotation.SuppressLint
+import android.net.http.HttpException
+import android.util.Log
+import com.example.shoepee.entity.Address
+
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -20,10 +25,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.shoepee.services.AddressApi
+import com.example.shoepee.services.AddressService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,12 +49,23 @@ fun RegisterScreen(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+    var cpf by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf(Address()) }
+    var cep by remember { mutableStateOf("") }
 
     // Excessões
     var errorMessage by remember { mutableStateOf("") }
     var usernameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
+    var ageError by remember { mutableStateOf(false) }
+    var cpfError by remember { mutableStateOf(false) }
+    var phoneError by remember { mutableStateOf(false) }
+    var addressError by remember { mutableStateOf(false) }
+    var cepError by remember { mutableStateOf(false) }
+
 
     val context = LocalContext.current
 
@@ -55,8 +79,55 @@ fun RegisterScreen(
     val firestore = FirebaseFirestore.getInstance()
 
 
+    // Função para buscar o endereço usando o CEP (via ViaCep)
+    fun getAddressFromCep(cep: String) {
+        val cleanCep = cep.replace("-", "") // Remove o traço do CEP
+
+        if (cleanCep.length == 8) {
+            // Use a função de corrotina dentro de um escopo de corrotina
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val addressData = AddressApi.service.getAddress(cleanCep)
+
+                    // Log para verificar a resposta
+                    Log.d("AddressResponse", "Endereco recebido: $addressData")
+
+                    // Mapeamento correto para o seu objeto Address
+                    val mappedAddress = Address(
+                        cep = addressData.cep,
+                        street = addressData.street,
+                        neighborhood = addressData.neighborhood,
+                        city = addressData.city,
+                        state = addressData.state
+                    )
+
+
+
+                    // Atualiza o estado do endereço na thread principal
+                    withContext(Dispatchers.Main) {
+                        address = mappedAddress
+                        errorMessage = "" // Reseta a mensagem de erro
+                    }
+                } catch (@SuppressLint("NewApi") e: HttpException) {
+                    // Atualiza o estado do erro na thread principal
+                    withContext(Dispatchers.Main) {
+                        errorMessage = "Erro ao buscar endereço. Tente novamente."
+                    }
+                } catch (e: Exception) {
+                    // Atualiza o estado do erro na thread principal
+                    withContext(Dispatchers.Main) {
+                        errorMessage = "Erro desconhecido. Tente novamente."
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
     // Função para registrar o usuário no Firebase
-    fun registerUser(email: String, password: String, username: String) {
+    fun registerUser(email: String, password: String, username: String, age: String, cpf: String, phone: String, address: Address) {
 
         // Método de criação de conta do Firebase (Email/Conta)
         auth.createUserWithEmailAndPassword(email, password)
@@ -72,7 +143,17 @@ fun RegisterScreen(
                     user?.let {
                         val userData = hashMapOf(
                             "username" to username,
-                            "email" to email
+                            "email" to email,
+                            "age" to age,
+                            "cpf" to cpf,
+                            "phone" to phone,
+                            "address" to hashMapOf(
+                                "cep" to address.cep,
+                                "street" to address.street,
+                                "neighborhood" to address.neighborhood,
+                                "city" to address.city,
+                                "state" to address.state,
+                            ),
                         )
 
                         // Criando o documento do usuário no Firestore
@@ -110,10 +191,22 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        /**
+         *
+         * Cadastro de Usuário com os campos:
+         *
+         */
         Text(text = "Cadastro", fontSize = 32.sp, color = Color(0xFFFFA500))
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Nome do usuário
+
+
+
+        /**
+         *
+         *  Nome do Usuário
+         *
+         */
         OutlinedTextField(
             value = username,
             onValueChange = {
@@ -132,7 +225,127 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Email
+
+
+
+        /**
+         *
+         * Idade do Usuário
+         *
+         */
+        OutlinedTextField(
+            value = age,
+            onValueChange = {
+                age = it
+                ageError = it.isBlank()
+            },
+            label = { Text("Idade") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Idade do Usuário") },
+            isError = ageError,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        if (ageError) {
+            Text("Por favor, insira uma idade válida", color = Color.Red, fontSize = 12.sp)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+
+
+
+        /**
+         *
+         * CEP
+         *
+         */
+        OutlinedTextField(
+            value = cep,
+            onValueChange = {
+                cep = it
+                cepError = it.length != 8
+                if (it.length == 8) {
+                    getAddressFromCep(it) // Buscar o endereço ao preencher o CEP
+                }
+            },
+            label = { Text("CEP") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "CEP") },
+            isError = cepError,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+        )
+        if (cepError) {
+            Text("CEP inválido", color = Color.Red, fontSize = 12.sp)
+        }
+
+        // Exibe a mensagem de erro do CEP
+        if (errorMessage.isNotEmpty()) {
+            Text(errorMessage, color = Color.Red, fontSize = 12.sp)
+        }
+
+
+
+
+        /**
+         *
+         * Telefone do Usuário
+         *
+         */
+        OutlinedTextField(
+            value = phone,
+            onValueChange = {
+                phone = it
+                phoneError = it.isBlank()
+            },
+            label = { Text("Telefone") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Telefone") },
+            isError = phoneError,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        if (phoneError) {
+            Text("Informe um número de telefone válido", color = Color.Red, fontSize = 12.sp)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+
+
+        /**
+         *
+         * CPF do Usuário
+         *
+         */
+        OutlinedTextField(
+            value = cpf,
+            onValueChange = {
+                cpf = it
+                cpfError = it.isBlank()
+            },
+            label = { Text("CPF") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "CPF") },
+            isError = cpfError,
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        if (cpfError) {
+            Text("Informe um CPF válido", color = Color.Red, fontSize = 12.sp)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+
+
+
+
+        /**
+         *
+         * Email do Usuário
+         *
+         */
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -151,7 +364,18 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Senha
+
+
+
+
+
+
+
+        /**
+         *
+         * Senha do Usuário
+         *
+         */
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -171,11 +395,20 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão Registrar
+
+
+
+
+
+        /**
+         *
+         * Botão de confirmar registro do usuário.
+         *
+         */
         Button(
             onClick = {
                 if (username.isNotBlank() && isValidEmail(email) && password.length >= 8) {
-                    registerUser(email, password, username)
+                    registerUser(email, password, username, age, cpf, phone, address)
                 } else {
                     Toast.makeText(context, "Preencha todos os campos corretamente", Toast.LENGTH_SHORT).show()
                 }
@@ -191,12 +424,21 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botão Voltar
+
+        /**
+         *
+         * Botão de Retorno (A tela de login)
+         *
+         */
         TextButton(
             onClick = onBackClick,
             modifier = Modifier.fillMaxWidth()
-        ) {
+        )
+        {
             Text(text = "Voltar", fontSize = 16.sp, color = Color(0xFFFFA500))
         }
+
+
+
     }
 }
