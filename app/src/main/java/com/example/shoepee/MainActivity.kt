@@ -14,6 +14,7 @@ import com.example.shoepee.ui.pages.HomeScreen
 import com.example.shoepee.ui.pages.LoginScreen
 import com.example.shoepee.ui.pages.ProfileScreen
 import com.example.shoepee.ui.pages.RegisterScreen
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     var currentScreen by remember { mutableStateOf("login") }
     var isAuthenticated by remember { mutableStateOf(false) }
+    var isProfileScreenVisible by remember { mutableStateOf(false) }
 
     val onLogout: () -> Unit = {
         // Lógica de logout: redireciona para a tela de login
@@ -66,22 +68,21 @@ fun AppNavigation() {
                 currentScreen = "login"
 
 
-
         "profile" -> if (isAuthenticated) {
+            val currentUser = FirebaseAuth.getInstance().currentUser
             ProfileScreen(
-                userName = "Flavio Nascimento",
-                userLogin = "flavionascimento",
-                userPassword = "****",
-                userPhotoUrl = null,
-                onBackClick = { currentScreen = "home" },
-                )
+                userName = currentUser?.displayName ?: "Nome não disponível",
+                userLogin = currentUser?.email ?: "E-mail não disponível",
+                userPhotoUrl = currentUser?.photoUrl?.toString(),
+                onBackClick = { isProfileScreenVisible = false },
+
+                onLogoutClick = {
+                    isAuthenticated = false  // Atualiza estado global
+                    currentScreen = "login"  // 🔥 Redireciona IMEDIATAMENTE para login
+                }
+            )
         } else {
             currentScreen = "login"
         }
-
-
-
     }
-
-
 }

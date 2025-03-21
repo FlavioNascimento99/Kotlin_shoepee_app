@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +24,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +39,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
+import com.example.shoepee.entity.User
 
+
+// Função de logout
+fun logout(onLogout: () -> Unit) {
+    val auth = FirebaseAuth.getInstance()
+    auth.signOut()  // Desconecta o usuário
+    onLogout() // Atualiza o estado imediatamente após logout
+}
 
 // Tela de visualização de usuário (quando logado)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,36 +59,39 @@ import com.google.firebase.auth.FirebaseAuth
 fun ProfileScreen(
     userName: String,
     userLogin: String,
-    userPassword: String,
     userPhotoUrl: String? = null,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
 
-
-    // Criando instância de conexão com Banco de Dados Firebase
+    val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
+    val user by remember { mutableStateOf<User?>(null) }
     val currentUser = auth.currentUser
 
+    // 🔥 Observa mudanças no Firebase Auth
+    LaunchedEffect(currentUser) {
+        if (currentUser == null) {
+            onLogoutClick()  // Redireciona para login ao detectar logout
+        }
+    }
 
-    // Presets para dados caso os mesmos sejam "não-nulos"
+
     if (currentUser != null) {
-        val userName = currentUser.displayName ?: "Nome não disponível"
-        val userLogin = currentUser.email ?: "E-mail não disponível"
-        val userPassword = "********"
-        val userPhotoUrl = currentUser.photoUrl?.toString()
+        val displayName = currentUser.displayName ?: "Usuário"
+        val email = currentUser.email ?: "E-mail não disponível"
+        val photoUrl = currentUser.photoUrl?.toString()
 
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
-                        Text("Profile", fontSize = 24.sp, color = Color.White)
+                        Text("Perfil", fontSize = 24.sp, color = Color.White)
                     },
                     navigationIcon = {
-
-                        // Função para navegação onBackClick() muda propriedade 
                         IconButton(onClick = { onBackClick() }) {
                             Icon(
-                                imageVector = Icons.Default.Home,
+                                imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Back",
                                 tint = Color.White
                             )
@@ -84,7 +103,6 @@ fun ProfileScreen(
                 )
             },
 
-
             content = { paddingValues ->
                 Column(
                     modifier = Modifier
@@ -94,10 +112,10 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    if (userPhotoUrl != null) {
+                    if (photoUrl != null) {
                         Image(
-                            painter = rememberAsyncImagePainter(userPhotoUrl),
-                            contentDescription = "User Profile Image",
+                            painter = rememberAsyncImagePainter(photoUrl),
+                            contentDescription = "Imagem de perfil do usuário",
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(CircleShape),
@@ -108,37 +126,46 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = userName,
+                        text = displayName,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text = "Login: $userLogin",
+                        text = "Login: $email",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
 
-                    Text(
-                        text = "(Experimental)Password: $userPassword",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
+                    user?.let {
+                        Text(text = "Nome: ${it.name}")
+                        Text(text = "Email: ${it.email}")
+                        Text(text = "Idade: ${it.age}")
+                        Text(text = "Endereço: ${it.address}")
+                    }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Button(
                         onClick = {
-                            
-                            // @TODO: Adicionar evento de logout
-                        
+                            logout { onLogoutClick() }  // 🔥 Logout e navegação garantida
+
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Logout")
+                        Text("Sair")
                     }
                 }
             }
         )
     }
 }
+
+// Modelo de dados do usuário
+data class UserData(
+    val name: String = "",
+    val email: String = "",
+    val age: Int = 0,
+    val address: String = ""
+)
+
